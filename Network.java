@@ -31,7 +31,7 @@ public class Network {
      *  Notice that the method receives a String, and returns a User object. */
     public User getUser(String name) {
         for (int i = 0; i < userCount; i++) {
-            if (users[i].getName().equals(name))
+            if (users[i].getName().equalsIgnoreCase(name))
             return users[i];
         }
         return null;
@@ -61,10 +61,10 @@ public class Network {
     public boolean addFollowee(String name1, String name2) {
         if (getUser(name1) == null || getUser(name2) == null)
         return false;
-        // Check if the user(name1) already follows user(name2)
-        if (getUser(name1).follows(name2))
+        // Check if the user(name1) already follows user(name2) or if it's the same user
+        if (getUser(name1).follows(name2) || name1.equals(name2))
         return false;
-
+        
         return getUser(name1).addFollowee(name2);
     }
     
@@ -86,12 +86,15 @@ public class Network {
      *  The user who appears the most in the follow lists of all the users. */
     public String mostPopularUser() {
         int counter = 0, counterMax = 0, saveIndex = 0;
+        boolean flagNullCheck = true;
         for (int i = 0; i < users.length; i++) {
             
             if (users[i] != null)
             for (int j = 0; j < users.length; j++) {
-                if (users[j] != null && users[j].follows(users[i].getName()))
+                if (users[j] != null && users[j].follows(users[i].getName())) {
                     counter++;
+                    flagNullCheck = false;
+                }
             }
 
             if (counter > counterMax) {
@@ -100,6 +103,9 @@ public class Network {
             }
             counter = 0;
         }
+        if (flagNullCheck)
+        return null;
+
         return users[saveIndex].getName();
     }
 
@@ -116,14 +122,28 @@ public class Network {
 
     // Returns a textual description of all the users in this network, and who they follow.
     public String toString() {
-        String res = "";
+        String res = "Network:";
+        boolean hasUsers = false;
+    
         for (int i = 0; i < users.length; i++) {
             if (users[i] != null) {
+                if (!hasUsers) {
+                    res += "\n";
+                    hasUsers = true;
+                }
                 res += users[i].toString();
-                res += "\n";
+                if (i < users.length - 1) { 
+                    for (int j = i + 1; j < users.length; j++) {
+                        if (users[j] != null) {
+                            res += "\n";
+                            break;
+                        }
+                    }
+                }
             }
         }
-
-       return res;
+        return res;
     }
+    
+    
 }
